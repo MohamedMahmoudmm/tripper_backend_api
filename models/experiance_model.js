@@ -1,0 +1,31 @@
+import mongoose from "mongoose";
+
+const experianceSchema = mongoose.Schema({
+    hostId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    name: {type: String,required: true},
+    description: String,
+    images: [String],
+    price: {type: Number,required: true},
+    dates: [Date],
+    activities:[
+        {
+            title: String,
+            description: String,
+            image
+        }
+    ],
+    address: {
+        country: {type: String,required: true},
+        city: {type:String, required: true},
+    },
+    starRating: {
+        type: Number,
+        min: 1,
+        max: 5,
+        default: 0
+        },
+        
+    
+}, {timestamps: true});
+
+export default mongoose.model("Experiance", experianceSchema);
