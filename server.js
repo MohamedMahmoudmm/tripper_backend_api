@@ -1,14 +1,11 @@
-import express from "express";
-import mongoose from 'mongoose';
-const app = express();
+import dotenv from 'dotenv';
+dotenv.config();
+import app from "./app.js"
 
 
-mongoose.connect('mongodb+srv://mm4574:mm4574@cluster0.xq5ja.mongodb.net/tripperDB').then(() => {
-    console.log("Connected to MongoDB");
-}).catch((err) => {
-    console.log(err);
-})
-
+// Start server
+const PORT = process.env.PORT;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
 
 
 

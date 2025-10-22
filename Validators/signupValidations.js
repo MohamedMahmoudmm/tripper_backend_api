@@ -20,9 +20,7 @@ const signupValidation = [
     .notEmpty()
     .withMessage("Password cannot be empty")
     .isLength({ min: 8 })
-    .withMessage("Password must be at least 8 characters long")
-    .isLength({ max: 12 })
-    .withMessage("Password cannot be more than 12 characters long"),
+    .withMessage("Password must be at least 8 characters long"),
   body("phone").trim().notEmpty().withMessage("Phone number cannot be empty"),
 ];
 export { signupValidation };
