@@ -3,21 +3,21 @@ import mongoose from "mongoose";
 const reviewHotelSchema = new mongoose.Schema({
   hotelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel', required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  rating: { type: Number, min: 1, max: 5 },
+  rating: { type: Number, min: 0, max: 5 },
   comment: String,
 }, { timestamps: true });
 
 const reviewPlaceSchema = new mongoose.Schema({
   hotelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Place', required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  rating: { type: Number, min: 1, max: 5 },
+  rating: { type: Number, min: 0, max: 5 },
   comment: String,
 }, { timestamps: true });
 
 const reviewExperianceSchema = new mongoose.Schema({
   hotelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Experiance', required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  rating: { type: Number, min: 1, max: 5 },
+  rating: { type: Number, min: 0, max: 5 },
   comment: String,
 }, { timestamps: true });
 
