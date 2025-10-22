@@ -1,12 +1,10 @@
 import mongoose from "mongoose";
-import { version } from "react";
-
 const userSchema = new mongoose.Schema({
     name:{type: String, required: true, minlength:3, maxlength:20},
     email:{type: String,required: true,unique:true},
-    password:{type: String,required: true,minlength:8,maxlength:12},
+    password:{type: String,required: true,minlength:8},
     image:{type: String},
-    phone:{type: String,},
+    phone:{type: String,required: true},
     identityImageUrl:{type: String},
     role:{
         type:[String],
