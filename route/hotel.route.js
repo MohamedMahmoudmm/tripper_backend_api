@@ -8,12 +8,15 @@ import { getAllHotels,
     getHotelsByHost,
     searchHotels } from "../controller/hotel.controller.js";
 
-router.get("/", getAllHotels);
-router.get("/:id", getHotelById);
-router.post("/", createHotel);
-router.put("/:id", updateHotel);
-router.delete("/:id", deleteHotel);
-router.get("/host/:hostId", getHotelsByHost);
+    import { auth } from "../middlewares/is_Auth.js";
+    import { host } from "../middlewares/is_Host.js";
+
+router.get("/",auth, getAllHotels);
+router.get("/:id",auth, getHotelById);
+router.post("/",auth, host, createHotel);
+router.put("/:id",auth,host, updateHotel);
+router.delete("/:id",auth,host, deleteHotel);
+router.get("/host/:hostId",auth,host, getHotelsByHost);
 router.get("/search", searchHotels);
 
 

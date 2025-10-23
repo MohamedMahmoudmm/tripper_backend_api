@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 export default app;
 dbConnection;
-app.use(userRouter)
+app.use('/user',userRouter)
 app.use('/hotel',hotelRouter)
 app.use('/experiance',experianceRouter)
 

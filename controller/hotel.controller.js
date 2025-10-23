@@ -28,7 +28,7 @@ const getHotelById = asyncHandler(async (req, res) => {
 // Create new hotel
 const createHotel = asyncHandler(async (req, res) => {
     const {
-        hostId,
+
         name,
         description,
         images,
@@ -46,7 +46,7 @@ const createHotel = asyncHandler(async (req, res) => {
     }
 
     const newHotel = new HotelModel({
-        hostId,
+        hostId: req.user._id,
         name,
         description,
         images: images || [],
@@ -74,8 +74,8 @@ const updateHotel = asyncHandler(async (req, res) => {
         delete updateData.hostId;
     }
 
-    const updatedHotel = await HotelModel.findByIdAndUpdate(
-        id,
+    const updatedHotel = await HotelModel.findOneAndUpdate(
+        { _id: id , hostId: req.user._id },
         { $set: updateData },
         { new: true, runValidators: true }
     );
@@ -95,7 +95,10 @@ const deleteHotel = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: "Invalid hotel ID" });
     }
 
-    const deletedHotel = await HotelModel.findByIdAndDelete(id);
+    const deletedHotel = await HotelModel.findOneAndDelete({
+        _id: id,
+        hostId: req.user._id
+    });
 
     if (!deletedHotel) {
         return res.status(404).json({ message: "Hotel not found" });
@@ -109,7 +112,7 @@ const deleteHotel = asyncHandler(async (req, res) => {
 
 // Get hotels by host
 const getHotelsByHost = asyncHandler(async (req, res) => {
-    const { hostId } = req.params;
+    const { hostId } = req.user._id;
 
     if (!mongoose.Types.ObjectId.isValid(hostId)) {
         return res.status(400).json({ message: "Invalid host ID" });

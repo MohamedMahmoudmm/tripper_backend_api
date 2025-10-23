@@ -26,7 +26,7 @@ export const signin = asyncHandler(async (req, res) => {
     return res.status(401).json({ message: "Invalid email or password" });
   if(user.isConfirmed === false) return res.status(401).json({ message: "User not confirmed" });
   let token = jwt.sign(
-    { _id: user._id, role: user.role, email: user.email },
+    { _id: user._id, activeRole: user.activeRole, email: user.email },
     "secret",
     { expiresIn: "1h" }
   );
@@ -36,6 +36,7 @@ export const signin = asyncHandler(async (req, res) => {
       _id: user._id,
       email: user.email,
       role: user.role,
+      activeRole: user.activeRole,
     },
     token,
   });
