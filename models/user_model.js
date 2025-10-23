@@ -20,9 +20,10 @@ const userSchema = new mongoose.Schema({
         type:Boolean,
         default:false
     },
-    isVerified:{
-        type:Boolean,
-        default:false
+ isVerified:{
+        type:String,
+        enum:["notVerified","verified","pending","rejected"],
+        default:"notVerified"
     },
 },
 {timestamps: true,versionKey: false}
