@@ -28,10 +28,8 @@ const getHotelById = asyncHandler(async (req, res) => {
 // Create new hotel
 const createHotel = asyncHandler(async (req, res) => {
     const {
-
         name,
         description,
-        images,
         price,
         amenities,
         address,
@@ -44,6 +42,7 @@ const createHotel = asyncHandler(async (req, res) => {
             message: "Name, price, and complete address (country, city, street) are required" 
         });
     }
+    const images = req.files.map(file => file.path);
 
     const newHotel = new HotelModel({
         hostId: req.user._id,

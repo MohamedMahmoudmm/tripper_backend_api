@@ -4,7 +4,7 @@ const hotelSchema = mongoose.Schema({
     hostId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     name: {type: String,required: true},
     description: String,
-    images: [String],
+    images: [{type:String}],
     price: {type: Number,required: true},
     amenities: [String],
     address: {
