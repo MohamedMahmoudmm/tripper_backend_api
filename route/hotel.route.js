@@ -16,7 +16,7 @@ router.get("/:id",auth, getHotelById);
 router.post("/",auth, host, createHotel);
 router.put("/:id",auth,host, updateHotel);
 router.delete("/:id",auth,host, deleteHotel);
-router.get("/host/:hostId",auth,host, getHotelsByHost);
+router.get("/host",auth,host, getHotelsByHost);
 router.get("/search", searchHotels);
 
 

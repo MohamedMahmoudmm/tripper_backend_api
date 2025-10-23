@@ -13,18 +13,20 @@ import {getAllExperiences,
     addDate,
     removeDate} from "../controller/experiance.controller.js";
 
+ import { auth } from "../middlewares/is_Auth.js";
+    import { host } from "../middlewares/is_Host.js";
 
-router.get("/", getAllExperiences);
-router.get("/:id", getExperienceById);
-router.post("/", createExperience);
-router.put("/:id", updateExperience);
-router.delete("/:id", deleteExperience);
-router.get("/host/:hostId", getExperiencesByHost);
-router.get("/search", searchExperiences);
-router.post("/:id/activities", addActivity);
-router.delete("/:id/activities/:activityId", removeActivity);
-router.post("/:id/dates", addDate);
-router.delete("/:id/dates", removeDate);
+router.get("/",auth, getAllExperiences);
+router.get("/:id",auth, getExperienceById);
+router.post("/",auth, host, createExperience);
+router.put("/:id",auth,host, updateExperience);
+router.delete("/:id",auth,host, deleteExperience);
+router.get("/host/:hostId",auth,host, getExperiencesByHost);
+router.get("/search",auth, searchExperiences);
+router.post("/:id/activities",auth,host, addActivity);
+router.delete("/:id/activities/:activityId",auth,host, removeActivity);
+router.post("/:id/dates",auth,host, addDate);
+router.delete("/:id/dates",auth,host, removeDate);
 
 
 
