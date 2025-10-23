@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 
 // Get all experiences
 const getAllExperiences = asyncHandler(async (req, res) => {
-    const experiences = await ExperienceModel.find().populate('hostId', 'name email');
+    const experiences = await ExperienceModel.find();
     res.status(200).json(experiences);
 });
 
@@ -16,7 +16,7 @@ const getExperienceById = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: "Invalid experience ID" });
     }
 
-    const experience = await ExperienceModel.findById(id).populate('hostId', 'name email');
+    const experience = await ExperienceModel.findById(id).populate('hostId', 'name email image');
     
     if (!experience) {
         return res.status(404).json({ message: "Experience not found" });
@@ -27,16 +27,13 @@ const getExperienceById = asyncHandler(async (req, res) => {
 
 // Create new experience
 const createExperience = asyncHandler(async (req, res) => {
-    const {
-        hostId,
+    let {
         name,
         description,
-        images,
         price,
         dates,
         activities,
         address,
-        starRating
     } = req.body;
 
     // Validate required fields
@@ -45,6 +42,7 @@ const createExperience = asyncHandler(async (req, res) => {
             message: "Name, price, country, and city are required" 
         });
     }
+    dates = dates ? JSON.parse(dates) : [];
 
     // Validate activities structure if provided
     if (activities && Array.isArray(activities)) {
@@ -56,9 +54,10 @@ const createExperience = asyncHandler(async (req, res) => {
             }
         }
     }
+    const images = req.files.map(file => file.path);
 
     const newExperience = new ExperienceModel({
-        hostId,
+        hostId: req.user._id,
         name,
         description,
         images: images || [],
@@ -66,7 +65,6 @@ const createExperience = asyncHandler(async (req, res) => {
         dates: dates || [],
         activities: activities || [],
         address,
-        starRating: starRating || 0
     });
 
     const savedExperience = await newExperience.save();
@@ -99,8 +97,8 @@ const updateExperience = asyncHandler(async (req, res) => {
         }
     }
 
-    const updatedExperience = await ExperienceModel.findByIdAndUpdate(
-        id,
+    const updatedExperience = await ExperienceModel.findOneAndUpdate(
+        {   _id: id , hostId: req.user._id },
         { $set: updateData },
         { new: true, runValidators: true }
     ).populate('hostId', 'name email');
@@ -120,7 +118,10 @@ const deleteExperience = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: "Invalid experience ID" });
     }
 
-    const deletedExperience = await ExperienceModel.findByIdAndDelete(id);
+    const deletedExperience = await ExperienceModel.findOneAndDelete({
+        _id: id,
+        hostId: req.user._id
+    }).populate('hostId', 'name email');
 
     if (!deletedExperience) {
         return res.status(404).json({ message: "Experience not found" });
@@ -134,13 +135,15 @@ const deleteExperience = asyncHandler(async (req, res) => {
 
 // Get experiences by host
 const getExperiencesByHost = asyncHandler(async (req, res) => {
-    const { hostId } = req.params;
+    const  hostId  = req.user._id;
 
+    console.log("ffffffffffffff");
+    
     if (!mongoose.Types.ObjectId.isValid(hostId)) {
         return res.status(400).json({ message: "Invalid host ID" });
     }
 
-    const experiences = await ExperienceModel.find({ hostId }).populate('hostId', 'name email');
+    const experiences = await ExperienceModel.find({ hostId });
     res.status(200).json(experiences);
 });
 
@@ -192,7 +195,7 @@ const searchExperiences = asyncHandler(async (req, res) => {
 // Add activity to experience
 const addActivity = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { title, description, image } = req.body;
+    const { title, description } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: "Invalid experience ID" });
@@ -201,9 +204,10 @@ const addActivity = asyncHandler(async (req, res) => {
     if (!title) {
         return res.status(400).json({ message: "Activity title is required" });
     }
+    const image = req.file ? req.file.path : null;
 
     const experience = await ExperienceModel.findByIdAndUpdate(
-        id,
+        { _id: id, hostId: req.user._id },
         { 
             $push: { 
                 activities: { title, description, image } 
@@ -258,7 +262,7 @@ const addDate = asyncHandler(async (req, res) => {
     }
 
     const experience = await ExperienceModel.findByIdAndUpdate(
-        id,
+        { _id: id, hostId: req.user._id },
         { 
             $addToSet: { 
                 dates: new Date(date) 

@@ -16,7 +16,7 @@ const getHotelById = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: "Invalid hotel ID" });
     }
 
-    const hotel = await HotelModel.findById(id);
+    const hotel = await HotelModel.findById(id).populate('hostId', 'name email image');
     
     if (!hotel) {
         return res.status(404).json({ message: "Hotel not found" });
@@ -33,7 +33,7 @@ const createHotel = asyncHandler(async (req, res) => {
         price,
         amenities,
         address,
-        starRating
+
     } = req.body;
 
     // Validate required fields
@@ -52,7 +52,6 @@ const createHotel = asyncHandler(async (req, res) => {
         price,
         amenities: amenities || [],
         address,
-        starRating: starRating || 0
     });
 
     const savedHotel = await newHotel.save();
@@ -111,7 +110,7 @@ const deleteHotel = asyncHandler(async (req, res) => {
 
 // Get hotels by host
 const getHotelsByHost = asyncHandler(async (req, res) => {
-    const { hostId } = req.user._id;
+    const  hostId  = req.user._id;
 
     if (!mongoose.Types.ObjectId.isValid(hostId)) {
         return res.status(400).json({ message: "Invalid host ID" });
