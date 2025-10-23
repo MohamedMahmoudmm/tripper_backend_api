@@ -25,11 +25,7 @@ export const signin = asyncHandler(async (req, res) => {
   if (!user || !(await bcrypt.compare(req.body.password, user.password)))
     return res.status(401).json({ message: "Invalid email or password" });
   if(user.isConfirmed === false) return res.status(401).json({ message: "User not confirmed" });
-  let token = jwt.sign(
-    { _id: user._id, activeRole: user.activeRole, email: user.email },
-    "secret",
-    { expiresIn: "1h" }
-  );
+  let token = jwt.sign({ _id: user._id, activeRole: user.activeRole, email: user.email }, 'secret');
   return res.json({
     message: "Login successful",
     user: {
