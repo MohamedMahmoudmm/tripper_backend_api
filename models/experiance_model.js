@@ -11,7 +11,7 @@ const experianceSchema = mongoose.Schema({
         {
             title: String,
             description: String,
-            image
+            image: String
         }
     ],
     address: {
