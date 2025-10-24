@@ -44,14 +44,56 @@ export const logout = asyncHandler(async (req, res) => {
 });
 
 //swithchRole[guest-host]
-// export const switchRole = asyncHandler(async(req,res)=>{
+export const switchRole = asyncHandler(async (req, res) => {
+    const { newRole } = req.body;
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    if (user.activeRole === "guest" && newRole === "host") {
+      if (!user.identityImageUrl) {
+        return res.status(400).json({ message: "Upload your ID first" });
+      }
+      if (user.isVerified !== "verified") {
+        return res.status(400).json({ message: "Wait for admin approval" });
+      }
+    }
+    if (!user.role.includes(newRole)) {
+      user.role.push(newRole);
+    }
 
-// })
+    user.activeRole = newRole;
+    await user.save();
+
+    res.status(200).json({
+      message: `Role switched to '${newRole}' successfully`,
+      activeRole: user.activeRole,
+    });
+
+});
+
 
 //verifyIdentity[nationalId]
-// export const verifyIdentity = asyncHandler(async(req,res)=>{
+export const verifyIdentity = asyncHandler(async (req, res) => {
+    const { userId } = req.params;
+    const { status } = req.body; 
 
-// })
+    if (!["verified", "rejected"].includes(status)) {
+      return res.status(400).json({ message: "Invalid verification status" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { isVerified: status },
+      { new: true }
+    );
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.status(200).json({
+      message: `User verification updated to '${status}'`,
+      user,
+    });
+
+});
 
 //emailConfirmation[nodemailer]
 export const confirmEmail = asyncHandler(async (req, res) => {
@@ -73,6 +115,31 @@ export const confirmEmail = asyncHandler(async (req, res) => {
   }
 });
 
-// export const getUserProfile = asyncHandler(async(req,res)=>{
+export const getUserProfile = asyncHandler(async(req,res)=>{
 
-// })
+})
+
+
+//uploadIdentityCard
+export const uploadIdentity = asyncHandler(async (req, res) => {
+    if (!req.file)     
+        return res.status(400).json({ message: "Please upload an ID image" });
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    user.identityImageUrl = req.file.path; 
+    user.isVerified = "pending"; 
+    await user.save()
+    res.status(200).json({
+      message: "Identity uploaded successfully. Waiting for admin approval.",
+      identityImage: user.identityImageUrl,
+      status: user.isVerified,
+    });
+ 
+});
+
+export const filterUsersByStatus = asyncHandler(async (req, res) => {
+  const { isVerified } = req.query;
+  const filter = isVerified ? { isVerified } : {};
+  const users = await User.find(filter);
+  res.status(200).json(users);
+});
