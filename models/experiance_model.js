@@ -27,5 +27,5 @@ const experianceSchema = mongoose.Schema({
         
     
 }, {timestamps: true});
-
-export default mongoose.model("Experiance", experianceSchema);
+const Experiance = mongoose.model("Experiance", experianceSchema);
+export default Experiance

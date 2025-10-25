@@ -117,9 +117,7 @@ export const confirmEmail = asyncHandler(async (req, res) => {
 
 export const getUserProfile = asyncHandler(async(req,res)=>{
 
-})
-
-
+}) 
 //uploadIdentityCard
 export const uploadIdentity = asyncHandler(async (req, res) => {
     if (!req.file)     
