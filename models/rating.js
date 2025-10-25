@@ -8,14 +8,14 @@ const reviewHotelSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const reviewPlaceSchema = new mongoose.Schema({
-  hotelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Place', required: true },
+  placeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Place', required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   rating: { type: Number, min: 0, max: 5 },
   comment: String,
 }, { timestamps: true });
 
 const reviewExperianceSchema = new mongoose.Schema({
-  hotelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Experiance', required: true },
+  experianceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Experiance', required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   rating: { type: Number, min: 0, max: 5 },
   comment: String,

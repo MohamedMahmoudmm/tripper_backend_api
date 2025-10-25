@@ -7,6 +7,7 @@ import placeRoutes from "./route/place.route.js"
 import reservationRouter from "./route/reservaiton.route.js";
 import messageRouter from "./route/message.route.js";
 import conversationRouter from "./route/conversation.route.js";
+import reviewRouter from "./route/Review.route.js";
 
 const app = express();
 app.use(express.json());
@@ -19,6 +20,7 @@ app.use("/places", placeRoutes);
 app.use("/api/reservations", reservationRouter);
 app.use('/message',messageRouter);
 app.use('/conversation',conversationRouter);
+app.use('/review',reviewRouter);
 
 
 
