@@ -3,6 +3,7 @@ import { dbConnection } from "./dbConnection.js";
 import userRouter from "./route/user.route.js";
 import hotelRouter from "./route/hotel.route.js";
 import experianceRouter from "./route/experiance.route.js";
+import placeRoutes from "./route/place.route.js"
 
 const app = express();
 app.use(express.json());
@@ -11,5 +12,7 @@ dbConnection;
 app.use('/user',userRouter)
 app.use('/hotel',hotelRouter)
 app.use('/experiance',experianceRouter)
+app.use("/places", placeRoutes);
+
 
 
