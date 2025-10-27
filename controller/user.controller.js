@@ -8,23 +8,35 @@ import sendEmail from "../email/email.js";
 // signup
 export const signup = asyncHandler(async (req, res) => {
   req.body.password = await bcrypt.hash(req.body.password, 8);
-  let user = await User.insertMany(req.body);
-  user[0].password = undefined;
-    const token = jwt.sign({ email: req.body.email }, "myEmail", {
+
+  let user = await User.create(req.body);
+  user.password = undefined;
+
+  const token = jwt.sign({ email: req.body.email }, "myEmail", {
     expiresIn: "1h",
   });
-  const verificationLink = `http://localhost:4000/verify/${token}`;
+
+  const verificationLink = `http://localhost:4000/user/verify/${token}`;
   const htmlTemplate = template(verificationLink);
-  await sendEmail(req.body.email, "Verify Your Email", htmlTemplate);
-  res.status(201).json({ message: "User created successfully", data: user });
+
+  try {
+    await sendEmail(req.body.email, "Verify Your Email", htmlTemplate);
+  } catch (error) {
+    console.error("Email sending error:", error);
+  }
+  res.status(201).json({
+    message: "User created successfully",
+    data: user,
+  });
 });
+
 
 //signin
 export const signin = asyncHandler(async (req, res) => {
   let user = await User.findOne({ email: req.body.email });
   if (!user || !(await bcrypt.compare(req.body.password, user.password)))
     return res.status(401).json({ message: "Invalid email or password" });
-  if(user.isConfirmed === false) return res.status(401).json({ message: "User not confirmed" });
+  if (user.isConfirmed === false) return res.status(401).json({ message: "User not confirmed" });
   let token = jwt.sign({ _id: user._id, activeRole: user.activeRole, email: user.email }, 'secret');
   return res.json({
     message: "Login successful",
@@ -45,53 +57,53 @@ export const logout = asyncHandler(async (req, res) => {
 
 //swithchRole[guest-host]
 export const switchRole = asyncHandler(async (req, res) => {
-    const { newRole } = req.body;
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ message: "User not found" });
-    if (user.activeRole === "guest" && newRole === "host") {
-      if (!user.identityImageUrl) {
-        return res.status(400).json({ message: "Upload your ID first" });
-      }
-      if (user.isVerified !== "verified") {
-        return res.status(400).json({ message: "Wait for admin approval" });
-      }
+  const { newRole } = req.body;
+  const user = await User.findById(req.user._id);
+  if (!user) return res.status(404).json({ message: "User not found" });
+  if (user.activeRole === "guest" && newRole === "host") {
+    if (!user.identityImageUrl) {
+      return res.status(400).json({ message: "Upload your ID first" });
     }
-    if (!user.role.includes(newRole)) {
-      user.role.push(newRole);
+    if (user.isVerified !== "verified") {
+      return res.status(400).json({ message: "Wait for admin approval" });
     }
+  }
+  if (!user.role.includes(newRole)) {
+    user.role.push(newRole);
+  }
 
-    user.activeRole = newRole;
-    await user.save();
+  user.activeRole = newRole;
+  await user.save();
 
-    res.status(200).json({
-      message: `Role switched to '${newRole}' successfully`,
-      activeRole: user.activeRole,
-    });
+  res.status(200).json({
+    message: `Role switched to '${newRole}' successfully`,
+    activeRole: user.activeRole,
+  });
 
 });
 
 
 //verifyIdentity[nationalId]
 export const verifyIdentity = asyncHandler(async (req, res) => {
-    const { userId } = req.params;
-    const { status } = req.body; 
+  const { userId } = req.params;
+  const { status } = req.body;
 
-    if (!["verified", "rejected"].includes(status)) {
-      return res.status(400).json({ message: "Invalid verification status" });
-    }
+  if (!["verified", "rejected"].includes(status)) {
+    return res.status(400).json({ message: "Invalid verification status" });
+  }
 
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { isVerified: status },
-      { new: true }
-    );
+  const user = await User.findByIdAndUpdate(
+    userId,
+    { isVerified: status },
+    { new: true }
+  );
 
-    if (!user) return res.status(404).json({ message: "User not found" });
+  if (!user) return res.status(404).json({ message: "User not found" });
 
-    res.status(200).json({
-      message: `User verification updated to '${status}'`,
-      user,
-    });
+  res.status(200).json({
+    message: `User verification updated to '${status}'`,
+    user,
+  });
 
 });
 
@@ -115,24 +127,24 @@ export const confirmEmail = asyncHandler(async (req, res) => {
   }
 });
 
-export const getUserProfile = asyncHandler(async(req,res)=>{
+export const getUserProfile = asyncHandler(async (req, res) => {
 
-}) 
+})
 //uploadIdentityCard
 export const uploadIdentity = asyncHandler(async (req, res) => {
-    if (!req.file)     
-        return res.status(400).json({ message: "Please upload an ID image" });
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ message: "User not found" });
-    user.identityImageUrl = req.file.path; 
-    user.isVerified = "pending"; 
-    await user.save()
-    res.status(200).json({
-      message: "Identity uploaded successfully. Waiting for admin approval.",
-      identityImage: user.identityImageUrl,
-      status: user.isVerified,
-    });
- 
+  if (!req.file)
+    return res.status(400).json({ message: "Please upload an ID image" });
+  const user = await User.findById(req.user._id);
+  if (!user) return res.status(404).json({ message: "User not found" });
+  user.identityImageUrl = req.file.path;
+  user.isVerified = "pending";
+  await user.save()
+  res.status(200).json({
+    message: "Identity uploaded successfully. Waiting for admin approval.",
+    identityImage: user.identityImageUrl,
+    status: user.isVerified,
+  });
+
 });
 
 export const filterUsersByStatus = asyncHandler(async (req, res) => {
