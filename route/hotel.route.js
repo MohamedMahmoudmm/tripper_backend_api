@@ -12,12 +12,12 @@ import { getAllHotels,
     import { host } from "../middlewares/is_Host.js";
     import  upload  from "../middlewares/hotelUpload.js";
     
-router.get("/", auth, getAllHotels);
+router.get("/", getAllHotels);
 
 router.get("/host", auth, host, getHotelsByHost);
 router.get("/search", searchHotels);
 
-router.get("/:id", auth, getHotelById);
+router.get("/:id", getHotelById);
 
 router.post("/", auth, host, upload.array("images",5), createHotel);
 router.put("/:id", auth, host, updateHotel);

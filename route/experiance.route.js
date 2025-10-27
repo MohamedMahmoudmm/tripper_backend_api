@@ -17,12 +17,12 @@ import {getAllExperiences,
     import { host } from "../middlewares/is_Host.js";
         import  upload  from "../middlewares/experianceUpload.js";
 
-router.get("/",auth, getAllExperiences);
+router.get("/", getAllExperiences);
 
 router.get("/host",auth,host, getExperiencesByHost);
-router.get("/search",auth, searchExperiences);
+router.get("/search", searchExperiences);
 
-router.get("/:id",auth, getExperienceById);
+router.get("/:id", getExperienceById);
 
 router.post("/",auth,host,upload.array("images",5), createExperience);
 router.put("/:id",auth,host, updateExperience);
