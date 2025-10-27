@@ -2,23 +2,28 @@ import Place from "../models/place_model.js";
 import { asyncHandler } from "../middlewares/errorHandler.js";
 
 
-// 🟢 Create new place (Admin only)
-export const createPlace = asyncHandler(async (req, res) => {
-  const newPlace = new Place(req.body);
-  await newPlace.save();
 
-  res.status(201).json({
-    message: "Place created successfully by admin",
-    data: newPlace,
-  });
+export const createPlace = asyncHandler(async (req, res) => {
+const {name,description,address} = req.body;
+    const images = req.files.map(file => file.path);
+   const ExistPlace = await Place.findOne({name});
+    if(ExistPlace){
+        res.status(400).json("Place with this name already exists");
+    }
+     const newPlace = new Place({
+       name,
+        description,
+         images: images || [],
+        address,
+     })
+     const savedPlace = await newPlace.save();
+      res.status(201).json(savedPlace);
 });
 
-// 🟡 Get all places (Anyone can view)
 export const getAllPlaces = asyncHandler(async (req, res) => {
   const { search, city } = req.query;
   let query = {};
 
-  // 🧩 Search (by name or description or country)
   if (search) {
     query.$or = [
       { name: { $regex: search, $options: "i" } },

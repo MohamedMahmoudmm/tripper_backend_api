@@ -8,11 +8,14 @@ import {
   updatePlace,
   deletePlace,
 } from "../controller/place.controller.js";
+import upload from "../middlewares/placeUpload.js";
+import addPlaceValidation from "../Validators/addPlace.js";
+import { handleValidationErrors } from "../Validators/handleValidationErrors.js";
 
 const router = express.Router();
 
 // Protected routes (need token)
-router.post("/", auth,admin, createPlace);
+router.post("/", auth,admin,upload.array("images",3),addPlaceValidation,handleValidationErrors ,createPlace);
 router.put("/:id", auth,admin, updatePlace);
 router.delete("/:id", auth,admin, deletePlace);
 
