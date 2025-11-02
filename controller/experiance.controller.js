@@ -308,6 +308,38 @@ const removeDate = asyncHandler(async (req, res) => {
     res.status(200).json(experience);
 });
 
+// Add images to experience
+const addExperienceImages = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid experience ID" });
+  }
+  const experience = await ExperienceModel.findOne({
+    _id: id,
+    hostId: req.user._id
+  });
+
+  if (!experience) {
+    return res.status(404).json({ message: "Experience not found" });
+  }
+
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ message: "No images uploaded" });
+  }
+  const newImages = req.files.map((file) => file.path);
+
+  experience.images = [...experience.images, ...newImages];
+  await experience.save();
+
+  res.status(200).json({
+    message: "Images added successfully",
+    images: experience.images
+  });
+});
+
+
+
 export {
     getAllExperiences,
     getExperienceById,
@@ -319,5 +351,6 @@ export {
     addActivity,
     removeActivity,
     addDate,
-    removeDate
+    removeDate,
+    addExperienceImages
 };

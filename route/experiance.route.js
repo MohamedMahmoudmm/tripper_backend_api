@@ -11,6 +11,7 @@ import {getAllExperiences,
     addActivity,
     removeActivity,
     addDate,
+    addExperienceImages,
     removeDate} from "../controller/experiance.controller.js";
 
  import { auth } from "../middlewares/is_Auth.js";
@@ -27,6 +28,9 @@ router.get("/:id", getExperienceById);
 router.post("/",auth,host,upload.array("images",5), createExperience);
 router.put("/:id",auth,host, updateExperience);
 router.delete("/:id",auth,host, deleteExperience);
+
+// علشان تعديل الصورة بتاعت الاكسبريانس
+router.post("/:id/images", auth, host, upload.array("images", 5), addExperienceImages);
 
 router.post("/:id/activities",auth,host,upload.single("image"), addActivity);
 router.delete("/:id/activities/:activityId",auth,host, removeActivity);
