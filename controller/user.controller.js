@@ -128,6 +128,22 @@ export const confirmEmail = asyncHandler(async (req, res) => {
 });
 
 export const getUserProfile = asyncHandler(async (req, res) => {
+    const userId = req.user._id; 
+    const user = await User.findById(userId).select('name email role phone isConfirmed isVerified'); 
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json({
+      message: "User profile fetched successfully",
+      user: {
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone,
+        isConfirmed: user.isConfirmed,
+        isVerified: user.isVerified
+      }
+    });
 
 })
 //uploadIdentityCard
