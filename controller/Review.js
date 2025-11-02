@@ -29,42 +29,44 @@ export const addReview = async (req, res) => {
     const { refModel, refId, rating, comment } = req.body;
     const userId = req.user._id;
 
-    // تحقق من الموديل المطلوب
     const Target = models[refModel];
     if (!Target) return res.status(400).json({ message: "Invalid model" });
 
-    // تأكد أن العنصر موجود
     const item = await Target.findById(refId);
     if (!item) return res.status(404).json({ message: `${refModel} not found` });
 
-    // تأكد المستخدم ما قيّمش قبل كده
     const existing = await Review.findOne({ refId, refModel, userId });
     if (existing)
       return res.status(400).json({ message: "You already reviewed this item" });
 
     // أضف التقييم
-    await Review.create({ refModel, refId, userId, rating, comment });
+    const review = await Review.create({ refModel, refId, userId, rating, comment });
+
+    // رجع الريفيو بعد ما نعمل populate علشان يظهر اسم المستخدم
+    const populatedReview = await Review.findById(review._id)
+      .populate("userId", "name email");
 
     // احسب المتوسط الجديد
-const result = await Review.aggregate([
-  {
-    $match: {
-      refModel,
-      refId: { $eq: new mongoose.Types.ObjectId(refId) }
-    }
-  },
-  {
-    $group: {
-      _id: null,
-      avg: { $avg: "$rating" }
-    }
-  }
-]);
+    const result = await Review.aggregate([
+      {
+        $match: {
+          refModel,
+          refId: new mongoose.Types.ObjectId(refId),
+        },
+      },
+      {
+        $group: { _id: null, avg: { $avg: "$rating" } },
+      },
+    ]);
 
     const avg = result.length ? result[0].avg.toFixed(1) : 0;
     await Target.findByIdAndUpdate(refId, { starRating: avg });
 
-    res.json({ message: "Review added successfully", averageRating: avg });
+    res.json({
+      message: "Review added successfully",
+      averageRating: avg,
+      review: populatedReview,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
