@@ -62,15 +62,15 @@ const createHotel = asyncHandler(async (req, res) => {
 const updateHotel = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
-
+    console.log( req.user._id);
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: "Invalid hotel ID" });
     }
 
     // Prevent updating hostId if provided
-    if (updateData.hostId) {
-        delete updateData.hostId;
-    }
+    // if (updateData.hostId) {
+    //     delete updateData.hostId;
+    // }
 
     const updatedHotel = await HotelModel.findOneAndUpdate(
         { _id: id , hostId: req.user._id },
