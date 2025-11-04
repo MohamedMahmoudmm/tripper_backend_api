@@ -15,5 +15,5 @@ userRouter.patch("/upload-id", auth, upload.single("identityImageUrl"), uploadId
 userRouter.patch("/switch-role", auth, switchRole);
 userRouter.patch("/verify/:userId", auth, admin, verifyIdentity);
 userRouter.get("/filter", auth, admin, filterUsersByStatus)
-userRouter.get("/profile/:id", auth, getUserProfile)
-export default userRouter
+userRouter.get("/profile", auth, getUserProfile)
+export default userRouter   

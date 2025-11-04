@@ -127,25 +127,30 @@ export const confirmEmail = asyncHandler(async (req, res) => {
   }
 });
 
-export const getUserProfile = asyncHandler(async (req, res) => {
+export const getUserProfile = async (req, res) => {
+  try {
     const userId = req.user._id; 
-    const user = await User.findById(userId).select('name email role phone isConfirmed isVerified'); 
+    const user = await User.findById(userId).select('name phone email role isConfirmed isVerified'); 
+    
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+    
     res.status(200).json({
       message: "User profile fetched successfully",
       user: {
         name: user.name,
+        phone: user.phone,
         email: user.email,
         role: user.role,
-        phone: user.phone,
         isConfirmed: user.isConfirmed,
         isVerified: user.isVerified
       }
     });
-
-})
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
 //uploadIdentityCard
 export const uploadIdentity = asyncHandler(async (req, res) => {
   if (!req.file)
