@@ -17,6 +17,7 @@ import {getAllExperiences,
  import { auth } from "../middlewares/is_Auth.js";
     import { host } from "../middlewares/is_Host.js";
         import  upload  from "../middlewares/experianceUpload.js";
+import { admin } from "../middlewares/is_Admin.js";
 
 router.get("/", getAllExperiences);
 
@@ -27,7 +28,7 @@ router.get("/:id", getExperienceById);
 
 router.post("/",auth,host,upload.array("images",5), createExperience);
 router.put("/:id",auth,host, updateExperience);
-router.delete("/:id",auth,host, deleteExperience);
+router.delete("/:id",auth,admin,host, deleteExperience);
 
 // علشان تعديل الصورة بتاعت الاكسبريانس
 router.post("/:id/images", auth, host, upload.array("images", 5), addExperienceImages);
