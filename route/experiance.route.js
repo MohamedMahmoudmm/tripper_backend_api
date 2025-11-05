@@ -16,6 +16,7 @@ import {getAllExperiences,
  import { auth } from "../middlewares/is_Auth.js";
     import { host } from "../middlewares/is_Host.js";
         import  upload  from "../middlewares/experianceUpload.js";
+import { admin } from "../middlewares/is_Admin.js";
 
 router.get("/",auth, getAllExperiences);
 
@@ -26,7 +27,7 @@ router.get("/:id",auth, getExperienceById);
 
 router.post("/",auth,host,upload.array("images",5), createExperience);
 router.put("/:id",auth,host, updateExperience);
-router.delete("/:id",auth,host, deleteExperience);
+router.delete("/:id",auth,admin,host, deleteExperience);
 
 router.post("/:id/activities",auth,host,upload.single("image"), addActivity);
 router.delete("/:id/activities/:activityId",auth,host, removeActivity);
