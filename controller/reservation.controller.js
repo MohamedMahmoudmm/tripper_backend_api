@@ -52,6 +52,7 @@ export const getAllReservations = asyncHandler(async (req, res) => {
   res.status(200).json(reservations);
 });
 
+
 export const getUserReservations = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const reservations = await Reservation.find({ guestId: userId })
@@ -89,4 +90,20 @@ export const filterReservationsByStatus = asyncHandler(async (req, res) => {
     .populate("hotelId", "name")
     .populate("experienceId", "name");
   res.status(200).json(reservations);
+});
+
+// get reservation by id
+export const getReservationById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const reservation = await Reservation.findById(id)
+    .populate("guestId", "name email")
+    .populate("hotelId", "name price images description address.city address.country")
+    .populate("experienceId", "name price images description address.city address.country");
+
+  if (!reservation) {
+    return res.status(404).json({ message: "Reservation not found" });
+  }
+
+  res.status(200).json(reservation);
 });

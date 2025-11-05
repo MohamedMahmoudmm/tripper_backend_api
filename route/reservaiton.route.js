@@ -5,6 +5,7 @@ import {
     getUserReservations,
     updateReservationStatus,
     filterReservationsByStatus,
+    getReservationById,
 } from "../controller/reservation.controller.js";
 import { auth} from "../middlewares/is_Auth.js";
 import { host } from "../middlewares/is_Host.js";
@@ -15,5 +16,9 @@ router.get("/", auth, host, getAllReservations);
 router.get("/my", auth, getUserReservations);
 router.patch("/:id/status", auth, host, updateReservationStatus);
 router.get("/filter", auth, host, filterReservationsByStatus);
+// get reservation by id
+router.get("/:id", auth, getReservationById);
+
+
 
 export default router;
