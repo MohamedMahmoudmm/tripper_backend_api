@@ -27,7 +27,7 @@ router.get("/:id",auth, getExperienceById);
 
 router.post("/",auth,host,upload.array("images",5), createExperience);
 router.put("/:id",auth,host, updateExperience);
-router.delete("/:id",auth,admin,host, deleteExperience);
+router.delete("/:id", auth, admin||host, deleteExperience);
 
 router.post("/:id/activities",auth,host,upload.single("image"), addActivity);
 router.delete("/:id/activities/:activityId",auth,host, removeActivity);
