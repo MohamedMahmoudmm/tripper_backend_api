@@ -112,25 +112,22 @@ const updateExperience = asyncHandler(async (req, res) => {
 
 // Delete experience
 const deleteExperience = asyncHandler(async (req, res) => {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: "Invalid experience ID" });
-    }
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid experience ID" });
+  }
 
-    const deletedExperience = await ExperienceModel.findOneAndDelete({
-        _id: id,
-        hostId: req.user._id
-    }).populate('hostId', 'name email');
+  const deletedExperience = await ExperienceModel.findByIdAndDelete(id).populate('hostId', 'name email');
 
-    if (!deletedExperience) {
-        return res.status(404).json({ message: "Experience not found" });
-    }
+  if (!deletedExperience) {
+    return res.status(404).json({ message: "Experience not found" });
+  }
 
-    res.status(200).json({ 
-        message: "Experience deleted successfully",
-        deletedExperience 
-    });
+  res.status(200).json({ 
+    message: "Experience deleted successfully",
+    deletedExperience 
+  });
 });
 
 // Get experiences by host
