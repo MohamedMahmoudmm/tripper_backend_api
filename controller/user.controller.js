@@ -55,6 +55,11 @@ export const logout = asyncHandler(async (req, res) => {
   return res.status(200).json({ message: "User logged out successfully" });
 });
 
+export const getAllUsers = asyncHandler(async (req, res) => {
+  const users = await User.find().select('-password');
+  res.status(200).json(users);
+});
+
 //swithchRole[guest-host]
 export const switchRole = asyncHandler(async (req, res) => {
   const { newRole } = req.body;

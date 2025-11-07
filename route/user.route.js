@@ -1,6 +1,6 @@
 import { handleValidationErrors } from "../Validators/handleValidationErrors.js";
 import { signupValidation } from "../Validators/signupValidations.js";
-import { confirmEmail, filterUsersByStatus, getUserProfile, signin, signup, switchRole, uploadIdentity, verifyIdentity } from "../controller/user.controller.js";
+import { confirmEmail, filterUsersByStatus, getUserProfile, signin, signup, switchRole, uploadIdentity, verifyIdentity, getAllUsers } from "../controller/user.controller.js";
 import { isEmailExists } from "../middlewares/isEmailExists.js";
 import { auth } from "../middlewares/is_Auth.js";
 import { admin } from "../middlewares/is_Admin.js";
@@ -16,4 +16,6 @@ userRouter.patch("/switch-role", auth, switchRole);
 userRouter.patch("/verify/:userId", auth, admin, verifyIdentity);
 userRouter.get("/filter", auth, admin, filterUsersByStatus)
 userRouter.get("/profile", auth, getUserProfile)
+userRouter.get('/', auth, admin, getAllUsers);
+
 export default userRouter   
