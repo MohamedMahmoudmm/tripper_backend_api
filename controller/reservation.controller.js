@@ -2,6 +2,7 @@ import Reservation from "../models/reservation_model.js";
 import HotelModel from "../models/hotel_model.js";
 import ExperienceModel from "../models/experiance_model.js";
 import { asyncHandler } from "../middlewares/errorHandler.js";
+import { host } from "../middlewares/is_Host.js";
 
 
 export const createReservation = asyncHandler(async (req, res) => {
@@ -10,6 +11,20 @@ export const createReservation = asyncHandler(async (req, res) => {
 
   if (!hotelId && !experienceId) {
     return res.status(400).json({ message: "Hotel or Experience ID is required" });
+  }
+
+  // 🧠 Check for existing reservation with same guest, same check-in date, same model
+  const existingReservation = await Reservation.findOne({
+    guestId,
+    checkIn: new Date(checkIn),
+    ...(hotelId && { hotelId }),
+    ...(experienceId && { experienceId }),
+  });
+
+  if (existingReservation) {
+    return res
+      .status(400)
+      .json({ message: "You already have a reservation for this date." });
   }
 
   let totalPrice = 0;
@@ -44,8 +59,20 @@ export const createReservation = asyncHandler(async (req, res) => {
   res.status(201).json(saved);
 });
 
+
 export const getAllReservations = asyncHandler(async (req, res) => {
-  const reservations = await Reservation.find()
+  const hostId = req.user._id;
+  const hostHotels = await HotelModel.find({ hostId }).select("_id");
+  const hostExperiences = await ExperienceModel.find({ hostId }).select("_id");
+  
+    const hotelIds = hostHotels.map(h => h._id);
+  const experienceIds = hostExperiences.map(e => e._id);
+  const reservations = await Reservation.find({
+    $or: [
+      { hotelId: { $in: hotelIds } },
+      { experienceId: { $in: experienceIds } },
+    ],
+  })
     .populate("guestId", "name email")
     .populate("hotelId", "name price")
     .populate("experienceId", "name price");
@@ -89,4 +116,13 @@ export const filterReservationsByStatus = asyncHandler(async (req, res) => {
     .populate("hotelId", "name")
     .populate("experienceId", "name");
   res.status(200).json(reservations);
+});
+
+export const getReservationById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const reservation = await Reservation.findById(id)
+    .populate("guestId")
+    .populate("hotelId")
+    .populate("experienceId");
+  res.status(200).json(reservation);
 });

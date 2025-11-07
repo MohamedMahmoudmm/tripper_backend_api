@@ -68,9 +68,7 @@ export const switchRole = asyncHandler(async (req, res) => {
       return res.status(400).json({ message: "Wait for admin approval" });
     }
   }
-  if (!user.role.includes(newRole)) {
-    user.role.push(newRole);
-  }
+  
 
   user.activeRole = newRole;
   await user.save();
@@ -94,7 +92,10 @@ export const verifyIdentity = asyncHandler(async (req, res) => {
 
   const user = await User.findByIdAndUpdate(
     userId,
-    { isVerified: status },
+    { isVerified: status,
+      role: status === "verified" ? ["guest", "host"] : ["guest"]
+
+     },
     { new: true }
   );
 
