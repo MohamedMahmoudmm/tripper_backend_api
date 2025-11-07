@@ -18,7 +18,7 @@ export default app;
 dbConnection;
 app.use('/user',userRouter)
 app.use('/hotel',hotelRouter)
-app.use('/experience',experianceRouter)
+app.use('/experiance',experianceRouter)
 app.use("/places", placeRoutes);
 app.use("/api/reservations", reservationRouter);
 app.use('/message',messageRouter);
