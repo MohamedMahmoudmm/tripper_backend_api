@@ -7,13 +7,11 @@ import {
     filterReservationsByStatus,
 } from "../controller/reservation.controller.js";
 import { auth} from "../middlewares/is_Auth.js";
-import { host } from "../middlewares/is_Host.js";
 const router = express.Router();
-
 router.post("/", auth, createReservation);
-router.get("/", auth, host, getAllReservations);
+router.get("/", auth, getAllReservations);
 router.get("/my", auth, getUserReservations);
-router.patch("/:id/status", auth, host, updateReservationStatus);
-router.get("/filter", auth, host, filterReservationsByStatus);
+router.patch("/:id/status", auth, updateReservationStatus);
+router.get("/filter", auth, filterReservationsByStatus);
 
 export default router;
