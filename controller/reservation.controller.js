@@ -61,18 +61,17 @@ export const createReservation = asyncHandler(async (req, res) => {
 
 
 export const getAllReservations = asyncHandler(async (req, res) => {
-  const hostId = req.user._id;
-  const hostHotels = await HotelModel.find({ hostId }).select("_id");
-  const hostExperiences = await ExperienceModel.find({ hostId }).select("_id");
-  
-    const hotelIds = hostHotels.map(h => h._id);
-  const experienceIds = hostExperiences.map(e => e._id);
-  const reservations = await Reservation.find({
-    $or: [
-      { hotelId: { $in: hotelIds } },
-      { experienceId: { $in: experienceIds } },
-    ],
-  })
+
+    // const hotelIds = hostHotels.map(h => h._id);
+  // const experienceIds = hostExperiences.map(e => e._id);
+  const reservations = await Reservation.find(
+  //   {
+  //   $or: [
+  //     { hotelId: { $in: hotelIds } },
+  //     { experienceId: { $in: experienceIds } },
+  //   ],
+  // }
+)
     .populate("guestId", "name email")
     .populate("hotelId", "name price")
     .populate("experienceId", "name price");
