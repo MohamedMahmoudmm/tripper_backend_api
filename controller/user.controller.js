@@ -133,30 +133,7 @@ export const confirmEmail = asyncHandler(async (req, res) => {
   }
 });
 
-export const getUserProfile = async (req, res) => {
-  try {
-    const userId = req.user._id; 
-    const user = await User.findById(userId).select('name phone email role isConfirmed isVerified'); 
-    
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    
-    res.status(200).json({
-      message: "User profile fetched successfully",
-      user: {
-        name: user.name,
-        phone: user.phone,
-        email: user.email,
-        role: user.role,
-        isConfirmed: user.isConfirmed,
-        isVerified: user.isVerified
-      }
-    });
-  } catch (err) {
-    res.status(500).json({ message: "Something went wrong", error: err.message });
-  }
-};
+
 //uploadIdentityCard
 export const uploadIdentity = asyncHandler(async (req, res) => {
   if (!req.file)
@@ -179,4 +156,109 @@ export const filterUsersByStatus = asyncHandler(async (req, res) => {
   const filter = isVerified ? { isVerified } : {};
   const users = await User.find(filter);
   res.status(200).json(users);
+});
+
+
+//Hazem
+// export const getUserProfile = async (req, res) => {
+//   try {
+//     const userId = req.user._id; 
+//     const user = await User.findById(userId).select('name phone email role isConfirmed isVerified'); 
+    
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+    
+//     res.status(200).json({
+//       message: "User profile fetched successfully",
+//       user: {
+//         name: user.name,
+//         phone: user.phone,
+//         email: user.email,
+//         role: user.role,
+//         isConfirmed: user.isConfirmed,
+//         isVerified: user.isVerified
+//       }
+//     });
+//   } catch (err) {
+//     res.status(500).json({ message: "Something went wrong", error: err.message });
+//   }
+// };
+
+
+// Mina
+
+
+//Mina
+export const getUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).select(
+    "name email phone image activeRole isVerified isConfirmed"
+  );
+
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+
+  res.status(200).json({
+    success: true,
+    data: {
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      image: user.image,
+      activeRole: user.activeRole,
+      isVerified: user.isVerified,
+      isConfirmed: user.isConfirmed
+    },
+  });
+});
+
+
+export const updateUserProfile = asyncHandler(async (req, res) => {
+  const { name, phone, email } = req.body;
+  
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+
+  if (name) user.name = name;
+  if (phone) user.phone = phone;
+  if (email) user.email = email;
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    data: {
+      name: user.name,
+      phone: user.phone,
+      email: user.email,
+      image: user.image,
+      activeRole: user.activeRole,
+      isVerified: user.isVerified,
+      isConfirmed: user.isConfirmed
+    }
+  });
+});
+
+
+export const updateUserProfileImage = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: "No image uploaded" });
+  }
+
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+
+  user.image = req.file.path;
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    data: { image: user.image },
+    message: "Profile image updated successfully"
+  });
 });
