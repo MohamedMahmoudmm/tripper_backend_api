@@ -86,6 +86,36 @@ export const getUserReservations = asyncHandler(async (req, res) => {
   res.status(200).json(reservations);
 });
 
+export const getHostReservations = asyncHandler(async (req, res) => {
+  const hostId = req.user._id;
+  const hostHotels = await HotelModel.find({ hostId }).select("_id");
+  const hostExperiences = await ExperienceModel.find({ hostId }).select("_id");
+  
+    const hotelIds = hostHotels.map(h => h._id);
+  const experienceIds = hostExperiences.map(e => e._id);
+  const reservations = await Reservation.find({
+    $or: [
+      { hotelId: { $in: hotelIds } },
+      { experienceId: { $in: experienceIds } },
+    ],
+  })
+    .populate("guestId", "name email")
+    .populate("hotelId", "name price")
+    .populate("experienceId", "name price");
+  res.status(200).json(reservations);
+});
+
+export const getReservationByhotelOrExperienceId = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user._id;
+  const reservations = await Reservation.find({
+    $or: [{ hotelId: id }, { experienceId: id }],guestId: userId
+  })
+    .populate("guestId", "name email")
+    .populate("hotelId", "name price")
+    .populate("experienceId", "name price");
+  res.status(200).json(reservations);
+})
 export const updateReservationStatus = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
