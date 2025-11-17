@@ -33,6 +33,7 @@ const createHotel = asyncHandler(async (req, res) => {
         price,
         amenities,
         address,
+        rooms
 
     } = req.body;
 
@@ -52,6 +53,7 @@ const createHotel = asyncHandler(async (req, res) => {
         price,
         amenities: amenities || [],
         address,
+        rooms: rooms || []
     });
 
     const savedHotel = await newHotel.save();

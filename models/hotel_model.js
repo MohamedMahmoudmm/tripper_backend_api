@@ -7,6 +7,15 @@ const hotelSchema = mongoose.Schema({
     images: [{type:String}],
     price: {type: Number,required: true},
     amenities: [String],
+    rooms: [
+        {
+            name: { type: String }, // e.g. "Deluxe Room"
+            price: { type: Number }, // specific room price
+            quantity: { type: Number, default: 1 }, // how many units exist
+            maxGuests: { type: Number, default: 2 },
+            amenities: [String],
+        }
+    ],
     address: {
         country: {type: String,required: true},
         city: {type:String, required: true},
