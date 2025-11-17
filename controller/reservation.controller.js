@@ -2,53 +2,120 @@ import Reservation from "../models/reservation_model.js";
 import HotelModel from "../models/hotel_model.js";
 import ExperienceModel from "../models/experiance_model.js";
 import { asyncHandler } from "../middlewares/errorHandler.js";
-import { host } from "../middlewares/is_Host.js";
 
 
 export const createReservation = asyncHandler(async (req, res) => {
-  const { hotelId, experienceId, checkIn, checkOut, guestsCount } = req.body;
+  const { hotelId, roomId, experienceId, checkIn, checkOut, guestsCount } = req.body;
   const guestId = req.user._id;
 
   if (!hotelId && !experienceId) {
     return res.status(400).json({ message: "Hotel or Experience ID is required" });
   }
 
-  // 🧠 Check for existing reservation with same guest, same check-in date, same model
-  const existingReservation = await Reservation.findOne({
-    guestId,
-    checkIn: new Date(checkIn),
-    ...(hotelId && { hotelId }),
-    ...(experienceId && { experienceId }),
-  });
-
-  if (existingReservation) {
-    return res
-      .status(400)
-      .json({ message: "You already have a reservation for this date." });
-  }
-
-  let totalPrice = 0;
-
-  if (hotelId) {
-    const hotel = await HotelModel.findById(hotelId);
-    if (!hotel) return res.status(404).json({ message: "Hotel not found" });
-
-    const nights =
-      (new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24);
-    totalPrice = nights * hotel.price;
-  }
-
+  // ============================
+  //  EXPERIENCE RESERVATION
+  // ============================
   if (experienceId) {
     const experience = await ExperienceModel.findById(experienceId);
     if (!experience) return res.status(404).json({ message: "Experience not found" });
 
-    totalPrice = guestsCount * experience.price;
+    const totalPrice = guestsCount * experience.price;
+
+    const reservation = new Reservation({
+      guestId,
+      experienceId,
+      totalPrice,
+      checkIn,
+      checkOut,
+      guestsCount,
+    });
+
+    const saved = await reservation.save();
+    return res.status(201).json(saved);
   }
+
+  // ============================
+  //      HOTEL RESERVATION
+  // ============================
+
+  const hotel = await HotelModel.findById(hotelId);
+  if (!hotel) return res.status(404).json({ message: "Hotel not found" });
+
+  const hotelHasRooms = hotel.rooms && hotel.rooms.length > 0;
+
+  // ============================================================
+  // CASE 1: Hotel DOES have rooms → room-level reservation
+  // ============================================================
+  if (hotelHasRooms) {
+    if (!roomId) {
+      return res.status(400).json({ message: "roomId is required for this hotel" });
+    }
+
+    const selectedRoom = hotel.rooms.id(roomId);
+    if (!selectedRoom) {
+      return res.status(404).json({ message: "Room not found in this hotel" });
+    }
+
+    // Count overlapping reservations for this room
+    const overlapping = await Reservation.countDocuments({
+      hotelId,
+      roomId,
+      status: { $ne: "cancelled" },
+      checkIn: { $lt: new Date(checkOut) },
+      checkOut: { $gt: new Date(checkIn) },
+    });
+
+    if (overlapping >= selectedRoom.quantity) {
+      return res.status(400).json({
+        message: "This room is fully booked for the selected dates",
+      });
+    }
+
+    const nights =
+      (new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24);
+
+    const totalPrice = nights * selectedRoom.price;
+
+    const reservation = new Reservation({
+      guestId,
+      hotelId,
+      roomId,
+      totalPrice,
+      checkIn,
+      checkOut,
+      guestsCount,
+    });
+
+    const saved = await reservation.save();
+    return res.status(201).json(saved);
+  }
+
+  // ============================================================
+  // CASE 2: Hotel does NOT have rooms → full-hotel booking
+  // ============================================================
+
+  // Check if dates overlap with any ACTIVE reservation
+  const conflict = await Reservation.findOne({
+    hotelId,
+    status: { $ne: "cancelled" },
+    checkIn: { $lt: new Date(checkOut) },
+    checkOut: { $gt: new Date(checkIn) },
+  });
+
+  if (conflict) {
+    return res.status(400).json({
+      message: "This hotel is already reserved for the selected dates.",
+    });
+  }
+
+  const nights =
+    (new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24);
+
+  const totalPrice = nights * hotel.price;
 
   const reservation = new Reservation({
     guestId,
     hotelId,
-    experienceId,
     totalPrice,
     checkIn,
     checkOut,
@@ -56,7 +123,7 @@ export const createReservation = asyncHandler(async (req, res) => {
   });
 
   const saved = await reservation.save();
-  res.status(201).json(saved);
+  return res.status(201).json(saved);
 });
 
 
