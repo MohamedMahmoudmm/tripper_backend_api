@@ -4,6 +4,7 @@ const reservationSchema = new mongoose.Schema({
   guestId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   hotelId: { type: mongoose.Schema.Types.ObjectId, ref: "Hotel" },
   roomId: { type: mongoose.Schema.Types.ObjectId },
+  roomCount: { type: Number, default: 1 },
   experienceId: { type: mongoose.Schema.Types.ObjectId, ref: "Experiance" },
   totalPrice: { type: Number, required: true },
   status: {

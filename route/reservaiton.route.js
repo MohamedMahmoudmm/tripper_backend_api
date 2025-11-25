@@ -5,7 +5,7 @@ import {
     getUserReservations,
     updateReservationStatus,
     filterReservationsByStatus,
-    getHostReservations,
+    getHostReservations,getRoomAvailability,
     getReservationByhotelOrExperienceId,
     getReservationById
 } from "../controller/reservation.controller.js";
@@ -16,6 +16,7 @@ const router = express.Router();
 router.post("/", auth, createReservation);
 router.get("/", auth, getAllReservations);
 router.get("/host", auth, getHostReservations);
+router.get("/availability", auth, getRoomAvailability);
 router.get("/my", auth, getUserReservations);
 router.patch("/:id/status", auth, host, updateReservationStatus);
 router.get("/filter", auth, host, filterReservationsByStatus);
