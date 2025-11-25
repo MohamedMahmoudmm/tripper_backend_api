@@ -10,6 +10,7 @@ import conversationRouter from "./route/conversation.route.js";
 import reviewRouter from "./route/Review.route.js";
 import cors from "cors";
 import paymentrouter from "./route/payment.route.js";
+import favoriteRouter from "./route/favorite.route.js";
 
 const app = express();
 app.use(express.json());
@@ -26,7 +27,6 @@ app.use('/message',messageRouter);
 app.use('/conversation',conversationRouter);
 app.use('/review',reviewRouter);
 app.use('/payment',paymentrouter);
-
-
+app.use('/favorite', favoriteRouter); 
 
 
