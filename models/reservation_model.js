@@ -12,11 +12,11 @@ const reservationSchema = new mongoose.Schema({
     enum: ["pending", "confirmed", "cancelled", "completed"],
     default: "pending",
   },
-  paymentStatus: {
-    type: String,
-    enum: ["unpaid", "pending", "succeeded", "failed"],
-    default: "unpaid",   // ← مهم جدًا
-  },
+paymentStatus: {
+  type: String,
+  enum: ["unpaid", "pending", "succeeded", "failed"],
+  default: "unpaid",
+},
   checkIn: { type: Date },
   checkOut: { type: Date },
   guestsCount: { type: Number, default: 1 },

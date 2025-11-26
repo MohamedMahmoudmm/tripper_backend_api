@@ -99,6 +99,7 @@ export const confirmPayment = asyncHandler(async (req, res) => {
   res.json({ message: "Payment confirmed successfully", payment: paymentIntent });
 });
 
+
 export const handleWebhook = asyncHandler(async (req, res) => {
   const event = req.body;
 
@@ -114,11 +115,11 @@ export const handleWebhook = asyncHandler(async (req, res) => {
       );
 
       if (payment) {
-        // ✅ Update Reservation payment status
+        // ✅ Update Reservation: paymentStatus = "succeeded" بدل "paid"
         await Reservation.findByIdAndUpdate(
           payment.reservationId,
           { 
-            paymentStatus: "succeeded",
+            paymentStatus: "succeeded",  // ← هنا التعديل المهم
             status: "confirmed" 
           }
         );
@@ -129,7 +130,6 @@ export const handleWebhook = asyncHandler(async (req, res) => {
     case "payment_intent.payment_failed": {
       const paymentIntentId = event.data.object.id;
       
-      // ✅ Update Payment status
       const payment = await Payment.findOneAndUpdate(
         { stripePaymentIntentId: paymentIntentId },
         { status: "failed" },
@@ -137,7 +137,6 @@ export const handleWebhook = asyncHandler(async (req, res) => {
       );
 
       if (payment) {
-        // ✅ Update Reservation payment status
         await Reservation.findByIdAndUpdate(
           payment.reservationId,
           { paymentStatus: "failed" }
