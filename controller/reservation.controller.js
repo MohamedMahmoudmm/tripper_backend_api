@@ -5,7 +5,7 @@ import { asyncHandler } from "../middlewares/errorHandler.js";
 
 
 export const createReservation = asyncHandler(async (req, res) => {
-  const { hotelId, roomId,roomCount, experienceId, checkIn, checkOut, guestsCount } = req.body;
+  const { hotelId, roomId,roomCount, experienceId, checkIn, checkOut, guestsCount, guestData } = req.body;
   const guestId = req.user._id;
 
   if (!hotelId && !experienceId) {
@@ -18,6 +18,16 @@ export const createReservation = asyncHandler(async (req, res) => {
   if (experienceId) {
     const experience = await ExperienceModel.findById(experienceId);
     if (!experience) return res.status(404).json({ message: "Experience not found" });
+    const reservations = await Reservation.find({
+      experienceId,
+      guestId,
+      checkIn
+    });
+
+    if (reservations.length > 0) {
+      return res.status(400).json({ message: "You already have a reservation for this experience" });
+    }
+    
 
     const totalPrice = guestsCount * experience.price;
 
@@ -91,6 +101,7 @@ if (hotelHasRooms) {
 
   const reservation = new Reservation({
     guestId,
+    guestData,
     hotelId,
     roomId,
     roomCount,
@@ -130,6 +141,7 @@ if (hotelHasRooms) {
 
   const reservation = new Reservation({
     guestId,
+    guestData,
     hotelId,
     totalPrice,
     checkIn,
@@ -279,5 +291,101 @@ export const getRoomAvailability = asyncHandler(async (req, res) => {
     totalRooms: room.quantity,
     booked: bookedCount
   });
+});
+
+export const getAvailableDates = asyncHandler(async (req, res) => {
+  const { hotelId, roomId } = req.query;
+
+  if (!hotelId) {
+    return res.status(400).json({ message: "hotelId is required" });
+  }
+
+  const hotel = await HotelModel.findById(hotelId);
+  if (!hotel) return res.status(404).json({ message: "Hotel not found" });
+
+  // RANGE: next 6 months
+  let start = new Date();
+  start.setHours(0, 0, 0, 0);
+
+  let end = new Date();
+  end.setMonth(end.getMonth() + 6);
+  end.setHours(23, 59, 59, 999);
+
+  // Fetch all reservations overlapping the range
+  const reservations = await Reservation.find({
+    hotelId,
+    status: { $ne: "cancelled" },
+    checkIn: { $lt: end },
+    checkOut: { $gt: start },
+  });
+
+  const hasRooms = hotel.rooms && hotel.rooms.length > 0;
+
+  let cursor = new Date(start);
+  let days = [];
+
+  while (cursor <= end) {
+    const day = new Date(cursor);
+    let isAvailable = false;
+
+    if (hasRooms) {
+      // Room-level check
+      if (roomId) {
+        const room = hotel.rooms.id(roomId);
+        if (!room) {
+          return res.status(404).json({ message: "Room not found" });
+        }
+        const capacity = room.quantity;
+
+        const bookedCount = reservations
+          .filter(r => String(r.roomId) === String(roomId))
+          .filter(r => day >= r.checkIn && day < r.checkOut)
+          .reduce((sum, r) => sum + (r.roomCount ?? 1), 0);
+
+        isAvailable = capacity - bookedCount > 0;
+      } else {
+        // Hotel-level availability (any room available)
+        for (let room of hotel.rooms) {
+          const capacity = room.quantity;
+          const bookedCount = reservations
+            .filter(r => String(r.roomId) === String(room._id))
+            .filter(r => day >= r.checkIn && day < r.checkOut)
+            .reduce((sum, r) => sum + (r.roomCount ?? 1), 0);
+
+          if (capacity - bookedCount > 0) {
+            isAvailable = true;
+            break;
+          }
+        }
+      }
+    } else {
+      // Hotel has no rooms → check hotel-level availability
+      const bookedCount = reservations.filter(r => day >= r.checkIn && day < r.checkOut).length;
+      isAvailable = bookedCount === 0; // available if no reservation overlaps
+    }
+
+    days.push({ date: day, available: isAvailable });
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  // Convert available days into continuous ranges
+  let ranges = [];
+  let currentRange = null;
+
+  days.forEach(d => {
+    if (d.available) {
+      if (!currentRange) currentRange = { start: d.date, end: d.date };
+      else currentRange.end = d.date;
+    } else {
+      if (currentRange) {
+        ranges.push(currentRange);
+        currentRange = null;
+      }
+    }
+  });
+
+  if (currentRange) ranges.push(currentRange);
+
+  return res.status(200).json(ranges);
 });
 
