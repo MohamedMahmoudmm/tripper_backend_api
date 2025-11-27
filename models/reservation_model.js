@@ -5,6 +5,11 @@ const reservationSchema = new mongoose.Schema({
   hotelId: { type: mongoose.Schema.Types.ObjectId, ref: "Hotel" },
   roomId: { type: mongoose.Schema.Types.ObjectId },
   roomCount: { type: Number, default: 1 },
+  guestData: {
+    name: { type: String },
+    email: { type: String },
+    phone: { type: String},
+  },
   experienceId: { type: mongoose.Schema.Types.ObjectId, ref: "Experiance" },
   totalPrice: { type: Number, required: true },
   status: {
