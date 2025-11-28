@@ -2,8 +2,9 @@ import { asyncHandler } from "../middlewares/errorHandler.js";
 import User from "../models/user_model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { template } from "../email/emailTemplate.js";
+import { template,hostApprovalTemplate,hostRejectionTemplate } from "../email/emailTemplate.js";
 import sendEmail from "../email/email.js";
+
 
 // signup
 export const signup = asyncHandler(async (req, res) => {
@@ -86,34 +87,68 @@ export const switchRole = asyncHandler(async (req, res) => {
 });
 
 
-//verifyIdentity[nationalId]
 export const verifyIdentity = asyncHandler(async (req, res) => {
   const { userId } = req.params;
-  const { status } = req.body;
+  const { status, reason } = req.body;
 
   if (!["verified", "rejected"].includes(status)) {
     return res.status(400).json({ message: "Invalid verification status" });
   }
 
-  const user = await User.findByIdAndUpdate(
-    userId,
-    { isVerified: status,
-      role: status === "verified" ? ["guest", "host"] : ["guest"]
+  if (!reason || reason.trim() === "") {
+    return res.status(400).json({ message: "Reason is required" });
+  }
 
-     },
-    { new: true }
-  );
+  if (reason.trim().length < 10) {
+    return res.status(400).json({ message: "Reason must be at least 10 characters" });
+  }
 
+  const user = await User.findById(userId);
   if (!user) return res.status(404).json({ message: "User not found" });
 
-  res.status(200).json({
-    message: `User verification updated to '${status}'`,
-    user,
-  });
+  user.isVerified = status;
+  user.role = status === "verified" ? ["guest", "host"] : ["guest"];
+  await user.save();
 
+  let emailSubject, emailTemplate;
+
+  if (status === "verified") {
+    emailSubject = "🎉 Your Host Application Has Been Approved!";
+    emailTemplate = hostApprovalTemplate(user.name, reason);
+  } else {
+    emailSubject = "Host Application Update - Tripper";
+    emailTemplate = hostRejectionTemplate(user.name, reason);
+  }
+
+  try {
+    await sendEmail(user.email, emailSubject, emailTemplate);
+  } catch (error) {
+    console.error("Email sending error:", error);
+    return res.status(500).json({ 
+      message: "User status updated but failed to send email",
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        isVerified: user.isVerified,
+        role: user.role
+      }
+    });
+  }
+
+  res.status(200).json({
+    message: `User ${status === 'verified' ? 'approved' : 'rejected'} successfully and email sent`,
+    user: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      isVerified: user.isVerified,
+      role: user.role
+    }
+  });
 });
 
-//emailConfirmation[nodemailer]
+
 export const confirmEmail = asyncHandler(async (req, res) => {
   try {
     const { token } = req.params;

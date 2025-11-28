@@ -91,3 +91,185 @@ export const template = (verificationLink) => {
 </html>
 `;
 };
+
+
+
+export const hostApprovalTemplate = (userName, reason) => {
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Host Application Approved</title>
+  <style>
+    body {
+      font-family: 'Poppins', Arial, sans-serif;
+      background-color: #f6f9fc;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 40px 30px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .logo img {
+      width: 100px;
+      height: auto;
+    }
+    .success-icon {
+      font-size: 60px;
+      color: #4caf50;
+      margin: 20px 0;
+    }
+    h1 {
+      font-size: 26px;
+      color: #2b2d42;
+      margin-bottom: 10px;
+    }
+    .message-box {
+      background: #f0f8f5;
+      border-left: 4px solid #4caf50;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+    p {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #444;
+    }
+    .reason {
+      font-style: italic;
+      color: #555;
+    }
+    .footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 12px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <img src="https://cdn-icons-png.flaticon.com/512/201/201623.png" alt="Tripper Logo" />
+      </div>
+      <div class="success-icon">✓</div>
+      <h1>Congratulations ${userName}! 🎉</h1>
+    </div>
+    <div class="message-box">
+      <p><strong>Your Host Application Has Been Approved!</strong></p>
+      <p>We're excited to welcome you as a Tripper Host. You can now start listing your properties and experiences.</p>
+      ${reason ? `<p class="reason"><strong>Admin Note:</strong> ${reason}</p>` : ''}
+    </div>
+    <p>Login to your dashboard and start creating amazing experiences for travelers around the world!</p>
+    <div class="footer">
+      © ${new Date().getFullYear()} Tripper Inc. All rights reserved.
+    </div>
+  </div>
+</body>
+</html>
+`;
+};
+
+export const hostRejectionTemplate = (userName, reason) => {
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Host Application Update</title>
+  <style>
+    body {
+      font-family: 'Poppins', Arial, sans-serif;
+      background-color: #f6f9fc;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 40px 30px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .logo img {
+      width: 100px;
+      height: auto;
+    }
+    .warning-icon {
+      font-size: 60px;
+      color: #ff5252;
+      margin: 20px 0;
+    }
+    h1 {
+      font-size: 26px;
+      color: #2b2d42;
+      margin-bottom: 10px;
+    }
+    .message-box {
+      background: #fff3f3;
+      border-left: 4px solid #ff5252;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+    p {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #444;
+    }
+    .reason {
+      font-weight: 600;
+      color: #c62828;
+    }
+    .footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 12px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <img src="https://cdn-icons-png.flaticon.com/512/201/201623.png" alt="Tripper Logo" />
+      </div>
+      <div class="warning-icon">✗</div>
+      <h1>Host Application Update</h1>
+    </div>
+    <div class="message-box">
+      <p>Dear ${userName},</p>
+      <p>Thank you for your interest in becoming a Tripper Host. After careful review, we regret to inform you that we cannot approve your application at this time.</p>
+      <p class="reason"><strong>Reason:</strong> ${reason}</p>
+    </div>
+    <p>If you believe this decision was made in error or would like to reapply in the future, please contact our support team.</p>
+    <div class="footer">
+      © ${new Date().getFullYear()} Tripper Inc. All rights reserved.
+    </div>
+  </div>
+</body>
+</html>
+`;
+};
