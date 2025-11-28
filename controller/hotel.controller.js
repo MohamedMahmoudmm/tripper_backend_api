@@ -38,7 +38,7 @@ const createHotel = asyncHandler(async (req, res) => {
     } = req.body;
 
     // Validate required fields
-    if (!name || !price || !address?.country || !address?.city || !address?.street) {
+    if (!name || !address?.country || !address?.city || !address?.street) {
         return res.status(400).json({
             message: "Name, price, and complete address (country, city, street) are required"
         });
