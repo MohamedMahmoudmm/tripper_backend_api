@@ -293,6 +293,7 @@ export const getRoomAvailability = asyncHandler(async (req, res) => {
   });
 });
 
+
 export const getAvailableDates = asyncHandler(async (req, res) => {
   const { hotelId, roomId } = req.query;
 
@@ -326,6 +327,9 @@ export const getAvailableDates = asyncHandler(async (req, res) => {
 
   while (cursor <= end) {
     const day = new Date(cursor);
+    // حول التاريخ لـ timestamp عشان المقارنة تكون دقيقة
+    const dayTime = day.getTime();
+    
     let isAvailable = false;
 
     if (hasRooms) {
@@ -339,7 +343,15 @@ export const getAvailableDates = asyncHandler(async (req, res) => {
 
         const bookedCount = reservations
           .filter(r => String(r.roomId) === String(roomId))
-          .filter(r => day >= r.checkIn && day < r.checkOut)
+          .filter(r => {
+            // حول كل التواريخ لـ timestamps وامسح الوقت
+            const checkInTime = new Date(r.checkIn).setHours(0, 0, 0, 0);
+            const checkOutTime = new Date(r.checkOut).setHours(0, 0, 0, 0);
+            
+            // اليوم محجوز لو كان >= checkIn و < checkOut
+            // يعني يوم الـ checkout نفسه يكون available
+            return dayTime >= checkInTime && dayTime < checkOutTime;
+          })
           .reduce((sum, r) => sum + (r.roomCount ?? 1), 0);
 
         isAvailable = capacity - bookedCount > 0;
@@ -349,7 +361,11 @@ export const getAvailableDates = asyncHandler(async (req, res) => {
           const capacity = room.quantity;
           const bookedCount = reservations
             .filter(r => String(r.roomId) === String(room._id))
-            .filter(r => day >= r.checkIn && day < r.checkOut)
+            .filter(r => {
+              const checkInTime = new Date(r.checkIn).setHours(0, 0, 0, 0);
+              const checkOutTime = new Date(r.checkOut).setHours(0, 0, 0, 0);
+              return dayTime >= checkInTime && dayTime < checkOutTime;
+            })
             .reduce((sum, r) => sum + (r.roomCount ?? 1), 0);
 
           if (capacity - bookedCount > 0) {
@@ -360,8 +376,13 @@ export const getAvailableDates = asyncHandler(async (req, res) => {
       }
     } else {
       // Hotel has no rooms → check hotel-level availability
-      const bookedCount = reservations.filter(r => day >= r.checkIn && day < r.checkOut).length;
-      isAvailable = bookedCount === 0; // available if no reservation overlaps
+      const bookedCount = reservations.filter(r => {
+        const checkInTime = new Date(r.checkIn).setHours(0, 0, 0, 0);
+        const checkOutTime = new Date(r.checkOut).setHours(0, 0, 0, 0);
+        return dayTime >= checkInTime && dayTime < checkOutTime;
+      }).length;
+      
+      isAvailable = bookedCount === 0;
     }
 
     days.push({ date: day, available: isAvailable });
@@ -388,4 +409,3 @@ export const getAvailableDates = asyncHandler(async (req, res) => {
 
   return res.status(200).json(ranges);
 });
-
