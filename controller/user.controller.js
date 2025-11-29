@@ -61,11 +61,12 @@ export const getAllUsers = asyncHandler(async (req, res) => {
   res.status(200).json(users);
 });
 
-//swithchRole[guest-host]
+//switchRole[guest-host]
 export const switchRole = asyncHandler(async (req, res) => {
   const { newRole } = req.body;
   const user = await User.findById(req.user._id);
   if (!user) return res.status(404).json({ message: "User not found" });
+  
   if (user.activeRole === "guest" && newRole === "host") {
     if (!user.identityImageUrl) {
       return res.status(400).json({ message: "Upload your ID first" });
@@ -74,16 +75,31 @@ export const switchRole = asyncHandler(async (req, res) => {
       return res.status(400).json({ message: "Wait for admin approval" });
     }
   }
-  
 
   user.activeRole = newRole;
   await user.save();
 
+  // 🔥 Generate new token with updated activeRole
+  const newToken = jwt.sign(
+    { 
+      _id: user._id, 
+      activeRole: user.activeRole, 
+      email: user.email 
+    }, 
+    'secret'
+  );
+
   res.status(200).json({
     message: `Role switched to '${newRole}' successfully`,
     activeRole: user.activeRole,
+    token: newToken, // ✅ Return new token
+    user: {
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+      activeRole: user.activeRole,
+    }
   });
-
 });
 
 
