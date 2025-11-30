@@ -87,6 +87,26 @@ const updateHotel = asyncHandler(async (req, res) => {
     res.status(200).json(updatedHotel);
 });
 
+
+const updateHotelImages = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    
+    const hotel = await HotelModel.findOne({ _id: id, hostId: req.user._id });
+    
+    if (!hotel) {
+        return res.status(404).json({ message: "Hotel not found" });
+    }
+
+    // ضيف الصور الجديدة بس
+    if (req.files && req.files.length > 0) {
+        const newImages = req.files.map(file => file.path);
+        hotel.images = [...hotel.images, ...newImages];
+    }
+
+    await hotel.save();
+    res.status(200).json(hotel);
+});
+
 // Delete hotel
 const deleteHotel = asyncHandler(async (req, res) => {
     const { id } = req.params;
@@ -177,6 +197,7 @@ export {
     getHotelById,
     createHotel,
     updateHotel,
+    updateHotelImages,
     deleteHotel,
     getHotelsByHost,
     searchHotels,
