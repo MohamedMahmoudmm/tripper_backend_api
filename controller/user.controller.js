@@ -177,6 +177,8 @@ export const confirmEmail = asyncHandler(async (req, res) => {
     );
 
     if (!user) return res.status(404).send("User not found");
+
+    res.status(200).send("Email confirmed successfully");
     // res.redirect("http://localhost:4000/signin");
   } catch (err) {
     console.error("Verify error:", err);
